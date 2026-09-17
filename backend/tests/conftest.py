@@ -1,24 +1,47 @@
 import os
-
-os.environ.setdefault(
-    "DATABASE_URL", "postgresql://postgres:postgres@localhost:5433/darukaa_test"
-)
-os.environ.setdefault("JWT_SECRET", "test-secret")
-os.environ.setdefault("CORS_ORIGINS", "http://localhost:5173")
+from pathlib import Path
+from urllib.parse import urlparse, urlunparse
 
 import pytest
+from dotenv import load_dotenv
 from fastapi.testclient import TestClient
 from sqlalchemy import text
 
-from app.core.database import Base, SessionLocal, engine
-from app.main import app
+load_dotenv(Path(__file__).resolve().parents[1] / ".env")
+
+database_url = os.getenv("DATABASE_URL")
+
+if database_url:
+    parsed = urlparse(database_url)
+    test_database_url = urlunparse(
+        (
+            parsed.scheme,
+            parsed.netloc,
+            "/darukaa_test",
+            parsed.params,
+            parsed.query,
+            parsed.fragment,
+        )
+    )
+else:
+    raise RuntimeError(
+        "DATABASE_URL is not set. Configure it in backend/.env before running tests."
+    )
+
+os.environ["DATABASE_URL"] = test_database_url
+os.environ.setdefault("JWT_SECRET", "test-secret")
+os.environ.setdefault("CORS_ORIGINS", "http://localhost:5173")
+
+from app.core.database import Base, SessionLocal, engine  # noqa: E402
+from app.main import app  # noqa: E402
 
 
 @pytest.fixture(scope="session", autouse=True)
 def _setup_test_database():
     """Create all tables once for the test session, and drop them afterwards.
-    Assumes the target database already has the PostGIS extension enabled
-    (see tests/README or the CI workflow, which runs `CREATE EXTENSION postgis`)."""
+
+    Assumes the target database already has the PostGIS extension enabled.
+    """
     Base.metadata.create_all(bind=engine)
     yield
     Base.metadata.drop_all(bind=engine)
@@ -26,7 +49,7 @@ def _setup_test_database():
 
 @pytest.fixture(autouse=True)
 def _clean_tables():
-    """Truncate all tables between tests so each test starts from a clean slate."""
+    """Truncate all tables between tests so each test starts clean."""
     yield
     db = SessionLocal()
     try:
@@ -47,7 +70,11 @@ def client():
 def registered_user(client):
     resp = client.post(
         "/api/auth/register",
-        json={"name": "Test User", "email": "user@example.com", "password": "supersecret123"},
+        json={
+            "name": "Test User",
+            "email": "user@example.com",
+            "password": "supersecret123",
+        },
     )
     assert resp.status_code == 201
     return resp.json()
@@ -61,11 +88,13 @@ def auth_headers(registered_user):
 
 SAMPLE_POLYGON = {
     "type": "Polygon",
-    "coordinates": [[
-        [77.5946, 12.9716],
-        [77.6046, 12.9716],
-        [77.6046, 12.9806],
-        [77.5946, 12.9806],
-        [77.5946, 12.9716],
-    ]],
+    "coordinates": [
+        [
+            [77.5946, 12.9716],
+            [77.6046, 12.9716],
+            [77.6046, 12.9806],
+            [77.5946, 12.9806],
+            [77.5946, 12.9716],
+        ]
+    ],
 }

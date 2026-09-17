@@ -14,20 +14,48 @@ router = APIRouter(prefix="/api/dashboard", tags=["dashboard"])
 
 
 @router.get("/summary", response_model=DashboardSummary)
-def dashboard_summary(db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
-    total_projects = db.query(func.count(Project.id)).scalar() or 0
-    total_sites = db.query(func.count(Site.id)).scalar() or 0
-    total_area = db.query(func.coalesce(func.sum(Site.area_hectares), 0)).scalar() or 0
+def dashboard_summary(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    total_projects = (
+        db.query(func.count(Project.id))
+        .filter(Project.created_by == current_user.id)
+        .scalar()
+        or 0
+    )
 
-    # Use each site's most recent metric record for "current" totals.
+    # Only include sites belonging to the user's projects.
+    total_sites = (
+        db.query(func.count(Site.id))
+        .join(Project, Site.project_id == Project.id)
+        .filter(Project.created_by == current_user.id)
+        .scalar()
+        or 0
+    )
+
+    total_area = (
+        db.query(func.coalesce(func.sum(Site.area_hectares), 0))
+        .join(Project, Site.project_id == Project.id)
+        .filter(Project.created_by == current_user.id)
+        .scalar()
+        or 0
+    )
+
+    # Find the most recent measurement for each site belonging
+    # to the authenticated user's projects.
     latest_metric_subq = (
         db.query(
             Metric.site_id,
             func.max(Metric.recorded_at).label("latest_date"),
         )
+        .join(Site, Metric.site_id == Site.id)
+        .join(Project, Site.project_id == Project.id)
+        .filter(Project.created_by == current_user.id)
         .group_by(Metric.site_id)
         .subquery()
     )
+
     latest_metrics = (
         db.query(Metric)
         .join(
@@ -39,8 +67,10 @@ def dashboard_summary(db: Session = Depends(get_db), current_user: User = Depend
     )
 
     total_carbon = sum(float(m.carbon_tonnes) for m in latest_metrics)
+
     avg_biodiversity = (
-        sum(float(m.biodiversity_index) for m in latest_metrics) / len(latest_metrics)
+        sum(float(m.biodiversity_index) for m in latest_metrics)
+        / len(latest_metrics)
         if latest_metrics
         else 0.0
     )
