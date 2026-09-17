@@ -7,7 +7,7 @@ class Settings(BaseSettings):
     model_config = SettingsConfigDict(env_file=".env", extra="ignore")
 
     # Database
-    DATABASE_URL: str = "postgresql://postgres:postgres@localhost:5432/darukaa"
+    DATABASE_URL: str = "postgresql://postgres:postgres@localhost:5433/darukaa_earth"
 
     # Auth
     JWT_SECRET: str = "change-me-in-production"
