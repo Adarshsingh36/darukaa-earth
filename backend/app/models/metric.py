@@ -1,5 +1,5 @@
 import uuid
-from datetime import UTC, date, datetime
+from datetime import timezone, date, datetime
 
 from sqlalchemy import Date, DateTime, ForeignKey, Integer, Numeric
 from sqlalchemy.dialects.postgresql import UUID
@@ -20,6 +20,7 @@ class Metric(Base):
     biodiversity_index: Mapped[float] = mapped_column(Numeric(6, 2), nullable=False, default=0)
     tree_cover_percentage: Mapped[float] = mapped_column(Numeric(6, 2), nullable=False, default=0)
     species_count: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
-    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=lambda: datetime.now(UTC))
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
 
     site = relationship("Site", back_populates="metrics")
+
