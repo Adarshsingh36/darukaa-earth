@@ -1,0 +1,12 @@
+{
+  "name": "darukaa-earth",
+  "private": true,
+  "version": "0.1.0",
+  "description": "Repo-root package used only to wire up Husky git hooks for the frontend workspace.",
+  "scripts": {
+    "prepare": "husky"
+  },
+  "devDependencies": {
+    "husky": "^9.1.7"
+  }
+}

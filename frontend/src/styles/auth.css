@@ -1,0 +1,50 @@
+.auth-page {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px;
+  background:
+    radial-gradient(circle at 20% 20%, rgba(122, 155, 118, 0.08), transparent 45%),
+    radial-gradient(circle at 80% 80%, rgba(201, 123, 74, 0.06), transparent 45%);
+}
+
+.auth-card {
+  width: 100%;
+  max-width: 400px;
+  padding: 36px 32px;
+}
+
+.auth-card h1 {
+  font-size: 26px;
+}
+
+.auth-subtitle {
+  color: var(--color-text-dim);
+  margin-top: 8px;
+  font-size: 14px;
+}
+
+.auth-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-top: 28px;
+}
+
+.auth-form button {
+  margin-top: 4px;
+}
+
+.auth-switch {
+  margin-top: 24px;
+  font-size: 13px;
+  color: var(--color-text-dim);
+  text-align: center;
+}
+
+.auth-switch a {
+  color: var(--color-sage-bright);
+  text-decoration: none;
+  font-weight: 600;
+}
