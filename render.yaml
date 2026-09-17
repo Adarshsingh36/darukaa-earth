@@ -1,0 +1,29 @@
+services:
+  - type: web
+    name: darukaa-earth-api
+    runtime: python
+    plan: free
+    rootDir: backend
+    buildCommand: "pip install -r requirements.txt && alembic upgrade head"
+    startCommand: "uvicorn app.main:app --host 0.0.0.0 --port $PORT"
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: darukaa-earth-db
+          property: connectionString
+      - key: JWT_SECRET
+        generateValue: true
+      - key: CORS_ORIGINS
+        sync: false # set to your deployed frontend URL, e.g. https://darukaa-earth.vercel.app
+      - key: ENVIRONMENT
+        value: production
+
+databases:
+  - name: darukaa-earth-db
+    plan: free
+    postgresMajorVersion: "16"
+    # NOTE: Render's managed Postgres does not enable PostGIS by default.
+    # After the database is created, connect with `psql` (Render gives you the
+    # external connection string on the database's dashboard page) and run:
+    #   CREATE EXTENSION IF NOT EXISTS postgis;
+    # This is a one-time step; see the README's Deployment section.
