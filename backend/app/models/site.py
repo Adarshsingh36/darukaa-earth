@@ -1,5 +1,5 @@
 import uuid
-from datetime import UTC, datetime
+from datetime import timezone, datetime
 
 from geoalchemy2 import Geometry
 from sqlalchemy import DateTime, ForeignKey, Numeric, String, Text
@@ -23,9 +23,10 @@ class Site(Base):
     geometry = mapped_column(Geometry(geometry_type="POLYGON", srid=4326), nullable=False)
 
     area_hectares: Mapped[float] = mapped_column(Numeric(12, 4), nullable=False, default=0)
-    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=lambda: datetime.now(UTC))
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
 
     project = relationship("Project", back_populates="sites")
     metrics = relationship(
         "Metric", back_populates="site", cascade="all, delete-orphan", order_by="Metric.recorded_at"
     )
+
