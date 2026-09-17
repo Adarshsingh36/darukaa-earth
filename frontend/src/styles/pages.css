@@ -350,3 +350,228 @@
     height: 400px;
   }
 }
+
+/* =========================================================
+   Site Measurement Form
+   ========================================================= */
+
+.measurement-form-card {
+  margin-bottom: 24px;
+}
+
+.measurement-form-card .section-header {
+  margin-bottom: 18px;
+}
+
+.measurement-form-card .section-header h2 {
+  margin-bottom: 4px;
+}
+
+.measurement-form-card .section-header p {
+  color: #a3ada4;
+  margin: 0;
+}
+
+.measurement-form-card .form-grid {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 16px;
+  align-items: end;
+}
+
+.measurement-form-card .form-field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+}
+
+.measurement-form-card .form-field span {
+  color: #c8d0c9;
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+.measurement-form-card .form-field input {
+  width: 100%;
+  box-sizing: border-box;
+  min-height: 42px;
+  padding: 10px 12px;
+
+  background: #141c18;
+  color: #ede9e3;
+
+  border: 1px solid #3b4a40;
+  border-radius: 8px;
+
+  outline: none;
+  font: inherit;
+  transition:
+    border-color 0.2s ease,
+    background-color 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.measurement-form-card .form-field input::placeholder {
+  color: #7f8b82;
+  opacity: 1;
+}
+
+.measurement-form-card .form-field input:hover {
+  background: #18221d;
+  border-color: #536458;
+}
+
+.measurement-form-card .form-field input:focus {
+  background: #18221d;
+  border-color: #7a9b76;
+  box-shadow: 0 0 0 2px rgba(122, 155, 118, 0.15);
+}
+
+.measurement-form-card .form-field input:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Keep browser date controls consistent with the dark theme */
+.measurement-form-card .form-field input[type='date'] {
+  color-scheme: dark;
+}
+
+/* Number input arrows */
+.measurement-form-card .form-field input[type='number'] {
+  color-scheme: dark;
+}
+
+.measurement-form-card .form-actions {
+  display: flex;
+  gap: 12px;
+  margin-top: 18px;
+}
+
+/* Measurement buttons */
+.measurement-form-card .primary-button {
+  min-height: 42px;
+  padding: 10px 18px;
+  border: 1px solid #6f9977;
+  border-radius: 8px;
+  background: #4f8060;
+  color: #f4f7f3;
+  font-weight: 600;
+  cursor: pointer;
+  transition:
+    background-color 0.2s ease,
+    border-color 0.2s ease,
+    transform 0.1s ease;
+}
+
+.measurement-form-card .primary-button:hover:not(:disabled) {
+  background: #5d906b;
+  border-color: #86a98b;
+}
+
+.measurement-form-card .primary-button:active:not(:disabled) {
+  transform: translateY(1px);
+}
+
+.measurement-form-card .primary-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.measurement-form-card .secondary-button {
+  min-height: 42px;
+  padding: 10px 18px;
+  border: 1px solid #3b4a40;
+  border-radius: 8px;
+  background: #141c18;
+  color: #d7ded8;
+  font-weight: 500;
+  cursor: pointer;
+  transition:
+    background-color 0.2s ease,
+    border-color 0.2s ease;
+}
+
+.measurement-form-card .secondary-button:hover:not(:disabled) {
+  background: #1c2821;
+  border-color: #536458;
+}
+
+/* Success / error feedback */
+.success-message {
+  margin-bottom: 18px;
+  padding: 12px 16px;
+  border: 1px solid #45694e;
+  border-radius: 8px;
+  background: #17251b;
+  color: #a9c9ad;
+}
+
+.error-message {
+  margin-bottom: 18px;
+  padding: 12px 16px;
+  border: 1px solid #754b45;
+  border-radius: 8px;
+  background: #281b19;
+  color: #e2aaa1;
+}
+
+/* Responsive form */
+@media (max-width: 1100px) {
+  .measurement-form-card .form-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 700px) {
+  .measurement-form-card .form-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .measurement-form-card .form-actions {
+    flex-direction: column;
+  }
+
+  .measurement-form-card .primary-button,
+  .measurement-form-card .secondary-button {
+    width: 100%;
+  }
+}
+/* =========================================================
+   Site Measurement Action Buttons
+   ========================================================= */
+
+.site-page .project-header .primary-button,
+.site-page .empty-state .primary-button {
+  min-height: 42px;
+  padding: 10px 18px;
+  border: 1px solid #6f9977;
+  border-radius: 8px;
+  background: #4f8060;
+  color: #f4f7f3;
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+  transition:
+    background-color 0.2s ease,
+    border-color 0.2s ease,
+    transform 0.1s ease;
+}
+
+.site-page .project-header .primary-button:hover,
+.site-page .empty-state .primary-button:hover {
+  background: #5d906b;
+  border-color: #86a98b;
+}
+
+.site-page .project-header .primary-button:active,
+.site-page .empty-state .primary-button:active {
+  transform: translateY(1px);
+}
+
+.site-page .project-header .primary-button:focus-visible,
+.site-page .empty-state .primary-button:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(122, 155, 118, 0.2);
+}
