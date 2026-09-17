@@ -1,8 +1,10 @@
 import { useEffect, useRef, useState } from 'react';
 import mapboxgl from 'mapbox-gl';
 import MapboxDraw from '@mapbox/mapbox-gl-draw';
+
 import 'mapbox-gl/dist/mapbox-gl.css';
 import '@mapbox/mapbox-gl-draw/dist/mapbox-gl-draw.css';
+
 import type { GeoJSONPolygon, Site } from '../api/types';
 
 const MAPBOX_TOKEN = import.meta.env.VITE_MAPBOX_TOKEN as string | undefined;
@@ -17,8 +19,14 @@ interface SiteMapProps {
   height?: string;
 }
 
+interface DrawEvent {
+  features: GeoJSON.Feature[];
+}
+
 function boundsFromSites(sites: Site[]): mapboxgl.LngLatBounds | null {
-  if (sites.length === 0) return null;
+  if (sites.length === 0) {
+    return null;
+  }
 
   const bounds = new mapboxgl.LngLatBounds();
   let hasPoints = false;
@@ -55,19 +63,43 @@ export function SiteMap({
   });
 
   const [mapReady, setMapReady] = useState(false);
-  const [tokenMissing] = useState(!MAPBOX_TOKEN);
+  const tokenMissing = !MAPBOX_TOKEN;
 
-  callbacksRef.current = {
-    onPolygonDrawn,
-    onPolygonCleared,
-    onSelectSite,
-  };
+  useEffect(() => {
+    callbacksRef.current = {
+      onPolygonDrawn,
+      onPolygonCleared,
+      onSelectSite,
+    };
+  }, [onPolygonDrawn, onPolygonCleared, onSelectSite]);
+
+  function handleDrawCreate(event: DrawEvent) {
+    const feature = event.features[0];
+
+    if (feature?.geometry.type === 'Polygon') {
+      callbacksRef.current.onPolygonDrawn?.(feature.geometry as GeoJSONPolygon);
+    }
+  }
+
+  function handleDrawUpdate(event: DrawEvent) {
+    const feature = event.features[0];
+
+    if (feature?.geometry.type === 'Polygon') {
+      callbacksRef.current.onPolygonDrawn?.(feature.geometry as GeoJSONPolygon);
+    }
+  }
+
+  function handleDrawDelete() {
+    callbacksRef.current.onPolygonCleared?.();
+  }
 
   /*
-   * Initialize Mapbox exactly once.
+   * Initialize Mapbox once.
    */
   useEffect(() => {
-    if (!containerRef.current || tokenMissing || mapRef.current) return;
+    if (!containerRef.current || tokenMissing || mapRef.current) {
+      return;
+    }
 
     mapboxgl.accessToken = MAPBOX_TOKEN as string;
 
@@ -84,12 +116,12 @@ export function SiteMap({
       setMapReady(true);
     });
 
-    map.on('click', 'sites-fill', (e) => {
-      const feature = e.features?.[0];
-      const id = feature?.properties?.id;
+    map.on('click', 'sites-fill', (event) => {
+      const feature = event.features?.[0];
+      const siteId = feature?.properties?.id;
 
-      if (id) {
-        callbacksRef.current.onSelectSite?.(id);
+      if (siteId) {
+        callbacksRef.current.onSelectSite?.(String(siteId));
       }
     });
 
@@ -112,12 +144,14 @@ export function SiteMap({
   }, [tokenMissing]);
 
   /*
-   * Manage Mapbox Draw independently from map initialization.
+   * Add or remove Mapbox Draw when drawing mode changes.
    */
   useEffect(() => {
     const map = mapRef.current;
 
-    if (!map || !mapReady) return;
+    if (!map || !mapReady) {
+      return;
+    }
 
     if (drawMode && !drawRef.current) {
       const draw = new MapboxDraw({
@@ -130,20 +164,22 @@ export function SiteMap({
       });
 
       map.addControl(draw, 'top-left');
-      drawRef.current = draw;
 
       map.on('draw.create', handleDrawCreate);
       map.on('draw.update', handleDrawUpdate);
       map.on('draw.delete', handleDrawDelete);
+
+      drawRef.current = draw;
     }
 
     if (!drawMode && drawRef.current) {
       map.removeControl(drawRef.current);
-      drawRef.current = null;
 
       map.off('draw.create', handleDrawCreate);
       map.off('draw.update', handleDrawUpdate);
       map.off('draw.delete', handleDrawDelete);
+
+      drawRef.current = null;
     }
 
     return () => {
@@ -154,12 +190,14 @@ export function SiteMap({
   }, [drawMode, mapReady]);
 
   /*
-   * Keep existing site polygons on the map.
+   * Render existing site polygons.
    */
   useEffect(() => {
     const map = mapRef.current;
 
-    if (!map || !mapReady) return;
+    if (!map || !mapReady) {
+      return;
+    }
 
     const sourceId = 'sites-source';
 
@@ -177,9 +215,7 @@ export function SiteMap({
       })),
     };
 
-    const existingSource = map.getSource(sourceId) as
-      | mapboxgl.GeoJSONSource
-      | undefined;
+    const existingSource = map.getSource(sourceId) as mapboxgl.GeoJSONSource | undefined;
 
     if (existingSource) {
       existingSource.setData(geojson);
@@ -194,18 +230,8 @@ export function SiteMap({
         type: 'fill',
         source: sourceId,
         paint: {
-          'fill-color': [
-            'case',
-            ['get', 'selected'],
-            '#c97b4a',
-            '#7a9b76',
-          ],
-          'fill-opacity': [
-            'case',
-            ['get', 'selected'],
-            0.35,
-            0.22,
-          ],
+          'fill-color': ['case', ['get', 'selected'], '#c97b4a', '#7a9b76'],
+          'fill-opacity': ['case', ['get', 'selected'], 0.35, 0.22],
         },
       });
 
@@ -214,18 +240,8 @@ export function SiteMap({
         type: 'line',
         source: sourceId,
         paint: {
-          'line-color': [
-            'case',
-            ['get', 'selected'],
-            '#e09564',
-            '#96b892',
-          ],
-          'line-width': [
-            'case',
-            ['get', 'selected'],
-            3,
-            1.5,
-          ],
+          'line-color': ['case', ['get', 'selected'], '#e09564', '#96b892'],
+          'line-width': ['case', ['get', 'selected'], 3, 1.5],
         },
       });
 
@@ -261,12 +277,14 @@ export function SiteMap({
   }, [sites, mapReady, selectedSiteId, drawMode]);
 
   /*
-   * Fit existing sites when entering a project map.
+   * Fit the map to existing sites when drawing mode starts.
    */
   useEffect(() => {
     const map = mapRef.current;
 
-    if (!map || !mapReady || !drawMode) return;
+    if (!map || !mapReady || !drawMode) {
+      return;
+    }
 
     const bounds = boundsFromSites(sites);
 
@@ -287,8 +305,8 @@ export function SiteMap({
         </p>
 
         <p>
-          Set <code>VITE_MAPBOX_TOKEN</code> in your frontend{' '}
-          <code>.env</code> file to enable the map.
+          Set <code>VITE_MAPBOX_TOKEN</code> in your frontend <code>.env</code> file to enable the
+          map.
         </p>
       </div>
     );
@@ -302,39 +320,5 @@ export function SiteMap({
         width: '100%',
       }}
     />
-  );
-}
-
-/*
- * Mapbox Draw event handlers.
- */
-function handleDrawCreate(e: { features: GeoJSON.Feature[] }) {
-  const feature = e.features[0];
-
-  if (feature?.geometry.type === 'Polygon') {
-    // This handler is replaced through the callback ref below.
-    window.dispatchEvent(
-      new CustomEvent('darukaa:polygon-drawn', {
-        detail: feature.geometry,
-      }),
-    );
-  }
-}
-
-function handleDrawUpdate(e: { features: GeoJSON.Feature[] }) {
-  const feature = e.features[0];
-
-  if (feature?.geometry.type === 'Polygon') {
-    window.dispatchEvent(
-      new CustomEvent('darukaa:polygon-drawn', {
-        detail: feature.geometry,
-      }),
-    );
-  }
-}
-
-function handleDrawDelete() {
-  window.dispatchEvent(
-    new CustomEvent('darukaa:polygon-cleared'),
   );
 }

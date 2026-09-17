@@ -1,1 +1,3 @@
-cd frontend && npx lint-staged
+export PATH="/c/Program Files/nodejs:$PATH"
+cd frontend
+npx.cmd lint-staged
