@@ -1,5 +1,5 @@
 """Password hashing and JWT helpers."""
-from datetime import UTC, datetime, timedelta
+from datetime import timezone, datetime, timedelta
 
 from jose import JWTError, jwt
 from passlib.context import CryptContext
@@ -18,7 +18,7 @@ def verify_password(plain_password: str, hashed_password: str) -> bool:
 
 
 def create_access_token(subject: str, expires_minutes: int | None = None) -> str:
-    expire = datetime.now(UTC) + timedelta(
+    expire = datetime.now(timezone.utc) + timedelta(
         minutes=expires_minutes or settings.ACCESS_TOKEN_EXPIRE_MINUTES
     )
     to_encode = {"sub": subject, "exp": expire}
@@ -31,3 +31,4 @@ def decode_access_token(token: str) -> str | None:
         return payload.get("sub")
     except JWTError:
         return None
+
