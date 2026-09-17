@@ -21,3 +21,54 @@ backend/.env
 
 # Logs
 *.log
+
+# Local environment and secrets
+.env
+*.env
+backend/.venv/
+frontend/node_modules/
+
+
+# Python cache
+__pycache__/
+*.py[cod]
+
+# Virtual environments
+.venv/
+venv/
+backend/.venv/
+
+# Environment secrets
+.env
+*.env
+
+# Frontend dependencies
+node_modules/
+frontend/node_modules/
+
+# Build output
+dist/
+build/
+
+
+# Python cache
+__pycache__/
+*.py[cod]
+
+# Virtual environments
+.venv/
+venv/
+backend/.venv/
+
+# Environment secrets
+.env
+*.env
+
+# Frontend dependencies
+node_modules/
+frontend/node_modules/
+
+# Build output
+dist/
+build/
+
